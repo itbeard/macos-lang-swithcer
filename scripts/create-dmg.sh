@@ -3,8 +3,8 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-APP_NAME="FnLangSwitch"
-DMG_NAME="FnLangSwitch-Installer"
+APP_NAME="MacLangTools"
+DMG_NAME="MacLangTools-Installer"
 VERSION="1.0"
 
 BUILD_DIR="$PROJECT_DIR/.build"
@@ -13,11 +13,11 @@ DMG_DIR="$BUILD_DIR/dmg"
 DMG_FILE="$BUILD_DIR/$DMG_NAME-$VERSION.dmg"
 
 if [ ! -d "$APP_BUNDLE" ]; then
-    echo "❌ Приложение не собрано. Сначала выполните: ./scripts/build.sh"
+    echo "❌ App not built. First run: ./scripts/build.sh"
     exit 1
 fi
 
-echo "📀 Создание DMG образа..."
+echo "📀 Creating DMG image..."
 
 rm -rf "$DMG_DIR"
 rm -f "$DMG_FILE"
@@ -27,30 +27,30 @@ cp -R "$APP_BUNDLE" "$DMG_DIR/"
 
 ln -s /Applications "$DMG_DIR/Applications"
 
-cat > "$DMG_DIR/УСТАНОВКА.txt" << 'EOF'
-# Fn Lang Switch — Установка
+cat > "$DMG_DIR/README.txt" << 'EOF'
+# MacLangTools — Installation
 
-1. Перетащите FnLangSwitch.app в папку Applications
-2. Запустите приложение из Applications
-3. Добавьте приложение в Accessibility:
+1. Drag MacLangTools.app to the Applications folder
+2. Launch the app from Applications
+3. Add the app to Accessibility:
    System Settings → Privacy & Security → Accessibility
-   Нажмите '+' и выберите FnLangSwitch.app
+   Click '+' and select MacLangTools.app
 
-Без разрешения Accessibility приложение не сможет 
-отслеживать нажатия клавиши Fn.
+Without Accessibility permission, the app cannot
+track Option key presses.
 
-## Использование
+## Usage
 
-| Действие | По умолчанию |
-|----------|--------------|
-| Fn × 2   | Русский      |
-| Fn × 3   | English      |
-| Fn × 4   | —            |
+| Action      | Default |
+|-------------|---------|
+| Option × 2  | Russian |
+| Option × 3  | English |
+| Option × 4  | —       |
 
-Настройки: кликните на иконку 🌐 в менюбаре → Настройки...
+Settings: click the 🌐 icon in the menu bar → Settings...
 EOF
 
-echo "📦 Упаковка DMG..."
+echo "📦 Packaging DMG..."
 hdiutil create -volname "$APP_NAME" \
     -srcfolder "$DMG_DIR" \
     -ov -format UDZO \
@@ -59,7 +59,7 @@ hdiutil create -volname "$APP_NAME" \
 rm -rf "$DMG_DIR"
 
 echo ""
-echo "✅ DMG создан: $DMG_FILE"
+echo "✅ DMG created: $DMG_FILE"
 echo ""
-echo "📦 Размер: $(du -h "$DMG_FILE" | cut -f1)"
+echo "📦 Size: $(du -h "$DMG_FILE" | cut -f1)"
 

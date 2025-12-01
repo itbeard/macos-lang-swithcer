@@ -46,10 +46,10 @@ struct SettingsView: View {
                     ))
             }
             
-            Text("Fn Lang Switch")
+            Text("MacLangTools")
                 .font(.system(size: 24, weight: .bold, design: .rounded))
             
-            Text("Переключай язык нажатиями Fn")
+            Text("Switch language with Option key taps")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }
@@ -60,7 +60,7 @@ struct SettingsView: View {
             VStack(spacing: 16) {
                 bindingRow(
                     icon: "2.circle.fill",
-                    label: "Двойное нажатие",
+                    label: "Double tap",
                     binding: $settings.doubleTapLanguage,
                     color: .blue
                 )
@@ -69,7 +69,7 @@ struct SettingsView: View {
                 
                 bindingRow(
                     icon: "3.circle.fill",
-                    label: "Тройное нажатие",
+                    label: "Triple tap",
                     binding: $settings.tripleTapLanguage,
                     color: .green
                 )
@@ -78,14 +78,14 @@ struct SettingsView: View {
                 
                 bindingRow(
                     icon: "4.circle.fill",
-                    label: "Четверное нажатие",
+                    label: "Quadruple tap",
                     binding: $settings.quadTapLanguage,
                     color: .orange
                 )
             }
             .padding(12)
         } label: {
-            Label("Привязки клавиш", systemImage: "keyboard")
+            Label("Key Bindings", systemImage: "keyboard")
                 .font(.headline)
         }
     }
@@ -101,7 +101,7 @@ struct SettingsView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             
             Picker("", selection: binding) {
-                Text("— Не задано —").tag("")
+                Text("— Not set —").tag("")
                 ForEach(availableSources, id: \.id) { source in
                     Text(source.name).tag(source.name)
                 }
@@ -115,9 +115,9 @@ struct SettingsView: View {
         GroupBox {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Text("Интервал между нажатиями")
+                    Text("Tap interval")
                     Spacer()
-                    Text("\(Int(settings.tapInterval * 1000)) мс")
+                    Text("\(Int(settings.tapInterval * 1000)) ms")
                         .font(.system(.body, design: .monospaced))
                         .foregroundColor(.secondary)
                 }
@@ -125,18 +125,18 @@ struct SettingsView: View {
                 Slider(value: $settings.tapInterval, in: 0.15...0.6, step: 0.05)
                 
                 HStack {
-                    Text("Быстрее")
+                    Text("Faster")
                         .font(.caption)
                         .foregroundColor(.secondary)
                     Spacer()
-                    Text("Медленнее")
+                    Text("Slower")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
             }
             .padding(8)
         } label: {
-            Label("Скорость", systemImage: "timer")
+            Label("Speed", systemImage: "timer")
                 .font(.headline)
         }
     }
@@ -167,7 +167,7 @@ struct SettingsView: View {
             .frame(height: 80)
             .padding(8)
         } label: {
-            Label("Доступные раскладки", systemImage: "list.bullet")
+            Label("Available Layouts", systemImage: "list.bullet")
                 .font(.headline)
         }
     }
@@ -177,13 +177,13 @@ struct SettingsView: View {
             Image(systemName: "exclamationmark.shield")
                 .foregroundColor(.orange)
             
-            Text("Требуется доступ к Accessibility")
+            Text("Accessibility permission required")
                 .font(.caption)
                 .foregroundColor(.secondary)
             
             Spacer()
             
-            Button("Открыть настройки") {
+            Button("Open Settings") {
                 NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)
             }
             .buttonStyle(.bordered)

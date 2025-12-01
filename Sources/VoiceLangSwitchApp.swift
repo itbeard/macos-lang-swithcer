@@ -32,7 +32,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "globe", accessibilityDescription: "Fn Lang Switch")
+            button.image = NSImage(systemSymbolName: "globe", accessibilityDescription: "MacLangTools")
         }
         
         updateMenu()
@@ -42,17 +42,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let menu = NSMenu()
         
         let currentLang = inputSourceManager.getCurrentInputSource() ?? "Unknown"
-        menu.addItem(NSMenuItem(title: "Текущий: \(currentLang)", action: nil, keyEquivalent: ""))
+        menu.addItem(NSMenuItem(title: "Current: \(currentLang)", action: nil, keyEquivalent: ""))
         menu.addItem(NSMenuItem.separator())
         
-        menu.addItem(NSMenuItem(title: "Fn×2 → \(settings.doubleTapLanguage.isEmpty ? "—" : settings.doubleTapLanguage)", action: nil, keyEquivalent: ""))
-        menu.addItem(NSMenuItem(title: "Fn×3 → \(settings.tripleTapLanguage.isEmpty ? "—" : settings.tripleTapLanguage)", action: nil, keyEquivalent: ""))
-        menu.addItem(NSMenuItem(title: "Fn×4 → \(settings.quadTapLanguage.isEmpty ? "—" : settings.quadTapLanguage)", action: nil, keyEquivalent: ""))
+        menu.addItem(NSMenuItem(title: "⌥×2 → \(settings.doubleTapLanguage.isEmpty ? "—" : settings.doubleTapLanguage)", action: nil, keyEquivalent: ""))
+        menu.addItem(NSMenuItem(title: "⌥×3 → \(settings.tripleTapLanguage.isEmpty ? "—" : settings.tripleTapLanguage)", action: nil, keyEquivalent: ""))
+        menu.addItem(NSMenuItem(title: "⌥×4 → \(settings.quadTapLanguage.isEmpty ? "—" : settings.quadTapLanguage)", action: nil, keyEquivalent: ""))
         
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "Настройки...", action: #selector(openSettings), keyEquivalent: ","))
+        menu.addItem(NSMenuItem(title: "Settings...", action: #selector(openSettings), keyEquivalent: ","))
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "Выход", action: #selector(quitApp), keyEquivalent: "q"))
+        menu.addItem(NSMenuItem(title: "Quit", action: #selector(quitApp), keyEquivalent: "q"))
         
         statusItem.menu = menu
     }
@@ -82,7 +82,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         guard let language = targetLanguage, !language.isEmpty else { return }
         
         if inputSourceManager.switchToLanguage(language) {
-            showNotification(title: "Язык изменён", body: language)
+            showNotification(title: "Language Changed", body: language)
             animateMenuBarIcon()
             updateMenu()
         }

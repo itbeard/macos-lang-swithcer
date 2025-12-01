@@ -3,19 +3,19 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-APP_NAME="FnLangSwitch"
-BUNDLE_ID="com.voicelangswitch.app"
+APP_NAME="MacLangTools"
+BUNDLE_ID="com.maclangtools.app"
 
 BUILD_DIR="$PROJECT_DIR/.build"
 RELEASE_DIR="$BUILD_DIR/release"
 APP_BUNDLE="$BUILD_DIR/$APP_NAME.app"
 
-echo "🔨 Сборка $APP_NAME..."
+echo "🔨 Building $APP_NAME..."
 cd "$PROJECT_DIR"
 
 swift build -c release
 
-echo "📦 Создание .app бандла..."
+echo "📦 Creating .app bundle..."
 rm -rf "$APP_BUNDLE"
 mkdir -p "$APP_BUNDLE/Contents/MacOS"
 mkdir -p "$APP_BUNDLE/Contents/Resources"
@@ -30,7 +30,7 @@ cat > "$APP_BUNDLE/Contents/Info.plist" << EOF
     <key>CFBundleName</key>
     <string>$APP_NAME</string>
     <key>CFBundleDisplayName</key>
-    <string>Fn Lang Switch</string>
+    <string>MacLangTools</string>
     <key>CFBundleIdentifier</key>
     <string>$BUNDLE_ID</string>
     <key>CFBundleVersion</key>
@@ -55,7 +55,7 @@ cat > "$APP_BUNDLE/Contents/Info.plist" << EOF
 </plist>
 EOF
 
-echo "✅ Сборка завершена: $APP_BUNDLE"
+echo "✅ Build complete: $APP_BUNDLE"
 echo ""
-echo "Для установки выполните: ./scripts/install.sh"
+echo "To install, run: ./scripts/install.sh"
 

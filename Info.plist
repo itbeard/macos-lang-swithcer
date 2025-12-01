@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleName</key>
-    <string>VoiceLangSwitch</string>
+    <string>MacLangTools</string>
     <key>CFBundleDisplayName</key>
-    <string>Voice Language Switch</string>
+    <string>MacLangTools</string>
     <key>CFBundleIdentifier</key>
-    <string>com.voicelangswitch.app</string>
+    <string>com.maclangtools.app</string>
     <key>CFBundleVersion</key>
     <string>1.0</string>
     <key>CFBundleShortVersionString</key>
@@ -17,9 +17,9 @@
     <key>LSUIElement</key>
     <true/>
     <key>NSMicrophoneUsageDescription</key>
-    <string>Приложению нужен доступ к микрофону для распознавания голосовых команд переключения языка.</string>
+    <string>The app needs microphone access for voice command recognition.</string>
     <key>NSSpeechRecognitionUsageDescription</key>
-    <string>Приложению нужен доступ к распознаванию речи для определения голосовых команд.</string>
+    <string>The app needs speech recognition access to detect voice commands.</string>
 </dict>
 </plist>
 

@@ -44,7 +44,7 @@ class HotkeyManager {
         CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
         CGEvent.tapEnable(tap: tap, enable: true)
         
-        print("Hotkey manager started. Multi-tap Fn to switch languages.")
+        print("Hotkey manager started. Multi-tap Option to switch languages.")
     }
     
     func stop() {
@@ -61,15 +61,15 @@ class HotkeyManager {
     private func handleEvent(proxy: CGEventTapProxy, type: CGEventType, event: CGEvent) -> Unmanaged<CGEvent>? {
         let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
         
-        // Fn key = 63 (kVK_Function)
-        if keyCode == 63 && type == .keyDown {
-            handleFnTap()
+        // Option key: 58 (left) or 61 (right)
+        if (keyCode == 58 || keyCode == 61) && type == .keyDown {
+            handleOptionTap()
         }
         
         return Unmanaged.passRetained(event)
     }
     
-    private func handleFnTap() {
+    private func handleOptionTap() {
         let now = Date()
         
         tapTimer?.invalidate()
@@ -98,11 +98,11 @@ class HotkeyManager {
     private func showAccessibilityAlert() {
         DispatchQueue.main.async {
             let alert = NSAlert()
-            alert.messageText = "Требуется разрешение"
-            alert.informativeText = "Добавьте приложение в System Settings → Privacy & Security → Accessibility"
+            alert.messageText = "Permission Required"
+            alert.informativeText = "Add the app to System Settings → Privacy & Security → Accessibility"
             alert.alertStyle = .warning
-            alert.addButton(withTitle: "Открыть настройки")
-            alert.addButton(withTitle: "Отмена")
+            alert.addButton(withTitle: "Open Settings")
+            alert.addButton(withTitle: "Cancel")
             
             if alert.runModal() == .alertFirstButtonReturn {
                 NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)

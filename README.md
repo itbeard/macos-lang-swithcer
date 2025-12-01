@@ -1,89 +1,88 @@
-# Fn Lang Switch ⌨️
+# MacLangTools ⌨️
 
-Приложение для macOS, которое переключает язык ввода по многократному нажатию клавиши Fn.
+A macOS app that switches input language by multiple Option key presses.
 
-## Как работает
+## How it works
 
-| Действие | По умолчанию |
-|----------|--------------|
-| Fn × 2 (двойное нажатие) | Русский |
-| Fn × 3 (тройное нажатие) | English |
-| Fn × 4 (четверное нажатие) | — |
+| Action | Default |
+|--------|---------|
+| Option × 2 (double tap) | Russian |
+| Option × 3 (triple tap) | English |
+| Option × 4 (quadruple tap) | — |
 
-Все привязки настраиваются через интерфейс!
+All bindings are configurable through the UI!
 
-## Требования
+## Requirements
 
-- macOS 13.0 (Ventura) или новее
-- Xcode Command Line Tools (для сборки)
+- macOS 13.0 (Ventura) or later
+- Xcode Command Line Tools (for building)
 
-## Быстрая установка
+## Quick Install
 
 ```bash
-./scripts/build.sh    # Сборка
-./scripts/install.sh  # Установка + автозапуск
+./scripts/build.sh    # Build
+./scripts/install.sh  # Install + auto-start
 ```
 
-## Создание DMG для распространения
+## Create DMG for distribution
 
 ```bash
 ./scripts/build.sh
 ./scripts/create-dmg.sh
 ```
 
-DMG будет создан в `.build/FnLangSwitch-Installer-1.0.dmg`
+DMG will be created at `.build/MacLangTools-Installer-1.0.dmg`
 
-## Удаление
+## Uninstall
 
 ```bash
 ./scripts/uninstall.sh
 ```
 
-## Ручная сборка
+## Manual Build
 
 ```bash
 swift build -c release
 .build/release/VoiceLangSwitch
 ```
 
-## Настройка
+## Settings
 
-1. Кликните на иконку 🌐 в менюбаре
-2. Выберите "Настройки..."
-3. Назначьте языки на двойное/тройное/четверное нажатие
-4. Настройте интервал между нажатиями (по умолчанию 300мс)
+1. Click the 🌐 icon in the menu bar
+2. Select "Settings..."
+3. Assign languages to double/triple/quadruple tap
+4. Adjust tap interval (default 300ms)
 
-## Разрешения
+## Permissions
 
-**Обязательно:** добавьте приложение в:
+**Required:** Add the app to:
 - System Settings → Privacy & Security → Accessibility
 
-Без этого разрешения приложение не сможет отслеживать нажатия Fn.
+Without this permission, the app cannot track Option key presses.
 
 ## Troubleshooting
 
-**Fn не работает:**
-- Убедитесь, что приложение добавлено в Accessibility
-- На некоторых Mac клавиша Fn может быть заблокирована системой для переключения эмодзи
-- Попробуйте отключить "Press 🌐 to" в System Settings → Keyboard
+**Option key not working:**
+- Make sure the app is added to Accessibility
+- Try disabling conflicting shortcuts in System Settings → Keyboard
 
-**Язык не переключается:**
-- Проверьте, что нужные языки добавлены в System Settings → Keyboard → Input Sources
+**Language not switching:**
+- Check that required languages are added in System Settings → Keyboard → Input Sources
 
-## Технические детали
+## Technical Details
 
-- **CGEventTap** — перехват нажатий клавиш
-- **Carbon API (TISInputSource)** — переключение раскладок
-- **SwiftUI** — интерфейс настроек
-- **UserDefaults** — сохранение настроек
+- **CGEventTap** — key press interception
+- **Carbon API (TISInputSource)** — keyboard layout switching
+- **SwiftUI** — settings UI
+- **UserDefaults** — settings storage
 
-## Структура проекта
+## Project Structure
 
 ```
 Sources/
-├── VoiceLangSwitchApp.swift  # Главное приложение
-├── HotkeyManager.swift       # Multi-tap Fn
-├── InputSourceManager.swift  # Переключение языков
-├── Settings.swift            # Модель настроек
-└── SettingsView.swift        # UI настроек
+├── VoiceLangSwitchApp.swift  # Main application
+├── HotkeyManager.swift       # Multi-tap Option
+├── InputSourceManager.swift  # Language switching
+├── Settings.swift            # Settings model
+└── SettingsView.swift        # Settings UI
 ```
