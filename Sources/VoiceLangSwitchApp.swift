@@ -52,7 +52,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Settings...", action: #selector(openSettings), keyEquivalent: ","))
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "Quit", action: #selector(quitApp), keyEquivalent: "q"))
+        
+        let exitItem = NSMenuItem(title: "Exit", action: #selector(quitApp), keyEquivalent: "q")
+        exitItem.keyEquivalentModifierMask = []
+        menu.addItem(exitItem)
         
         statusItem.menu = menu
     }

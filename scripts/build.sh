@@ -22,6 +22,11 @@ mkdir -p "$APP_BUNDLE/Contents/Resources"
 
 cp "$RELEASE_DIR/VoiceLangSwitch" "$APP_BUNDLE/Contents/MacOS/$APP_NAME"
 
+if [ -f "$PROJECT_DIR/Resources/AppIcon.icns" ]; then
+    cp "$PROJECT_DIR/Resources/AppIcon.icns" "$APP_BUNDLE/Contents/Resources/"
+    echo "🎨 Icon added"
+fi
+
 cat > "$APP_BUNDLE/Contents/Info.plist" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -51,6 +56,8 @@ cat > "$APP_BUNDLE/Contents/Info.plist" << EOF
     <false/>
     <key>NSSupportsSuddenTermination</key>
     <false/>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
 </dict>
 </plist>
 EOF
