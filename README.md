@@ -17,15 +17,32 @@
 - macOS 13.0 (Ventura) или новее
 - Xcode Command Line Tools (для сборки)
 
-## Установка и сборка
+## Быстрая установка
 
 ```bash
-cd VoiceLangSwitch
-swift build -c release
+./scripts/build.sh    # Сборка
+./scripts/install.sh  # Установка + автозапуск
 ```
 
-Запуск:
+## Создание DMG для распространения
+
 ```bash
+./scripts/build.sh
+./scripts/create-dmg.sh
+```
+
+DMG будет создан в `.build/FnLangSwitch-Installer-1.0.dmg`
+
+## Удаление
+
+```bash
+./scripts/uninstall.sh
+```
+
+## Ручная сборка
+
+```bash
+swift build -c release
 .build/release/VoiceLangSwitch
 ```
 
