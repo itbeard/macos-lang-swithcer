@@ -1,8 +1,10 @@
 import SwiftUI
+import ApplicationServices
 
 struct SettingsView: View {
     @ObservedObject private var settings = AppSettings.shared
     @State private var availableSources: [(name: String, id: String)] = []
+    @State private var hasAccessibilityPermission = false
     
     var body: some View {
         VStack(spacing: 24) {
@@ -23,6 +25,10 @@ struct SettingsView: View {
         )
         .onAppear {
             loadInputSources()
+            checkPermissions()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            checkPermissions()
         }
     }
     
@@ -174,12 +180,21 @@ struct SettingsView: View {
     
     private var permissionsSection: some View {
         HStack {
-            Image(systemName: "exclamationmark.shield")
-                .foregroundColor(.orange)
-            
-            Text("Accessibility permission required")
-                .font(.caption)
-                .foregroundColor(.secondary)
+            if hasAccessibilityPermission {
+                Image(systemName: "checkmark.shield.fill")
+                    .foregroundColor(.green)
+                
+                Text("Accessibility permission granted")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            } else {
+                Image(systemName: "exclamationmark.shield")
+                    .foregroundColor(.orange)
+                
+                Text("Accessibility permission required")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
             
             Spacer()
             
@@ -190,6 +205,10 @@ struct SettingsView: View {
             .controlSize(.small)
         }
         .padding(.horizontal, 4)
+    }
+    
+    private func checkPermissions() {
+        hasAccessibilityPermission = AXIsProcessTrusted()
     }
     
     private func languageColor(for name: String) -> Color {

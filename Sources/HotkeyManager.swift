@@ -25,14 +25,34 @@ class HotkeyManager {
     private init() {}
     
     func start() {
-        let trusted = AXIsProcessTrusted()
-        
-        if !trusted {
-            let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue(): true] as CFDictionary
-            AXIsProcessTrustedWithOptions(options)
+        if !AXIsProcessTrusted() {
+            requestAccessibilityPermission()
+            startPermissionPolling()
             return
         }
         
+        setupEventMonitors()
+    }
+    
+    private func requestAccessibilityPermission() {
+        let hasPrompted = UserDefaults.standard.bool(forKey: "hasPromptedAccessibility")
+        if !hasPrompted {
+            let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue(): true] as CFDictionary
+            AXIsProcessTrustedWithOptions(options)
+            UserDefaults.standard.set(true, forKey: "hasPromptedAccessibility")
+        }
+    }
+    
+    private func startPermissionPolling() {
+        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] timer in
+            if AXIsProcessTrusted() {
+                timer.invalidate()
+                self?.setupEventMonitors()
+            }
+        }
+    }
+    
+    private func setupEventMonitors() {
         flagsMonitor = NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
             self?.handleFlags(event.modifierFlags)
         }

@@ -1,110 +1,144 @@
+import AppKit
 import SwiftUI
 import UserNotifications
 
 @main
-struct VoiceLangSwitchApp: App {
-    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    
-    var body: some Scene {
-        Settings {
-            SettingsView()
-        }
+struct MacLangToolsMain {
+    static func main() {
+        let app = NSApplication.shared
+        let delegate = AppDelegate()
+        app.delegate = delegate
+        app.setActivationPolicy(.accessory)
+        app.run()
     }
 }
 
-class AppDelegate: NSObject, NSApplicationDelegate {
-    var statusItem: NSStatusItem!
-    var inputSourceManager: InputSourceManager!
-    var hotkeyManager: HotkeyManager!
-    var settings: AppSettings!
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    private var statusItem: NSStatusItem?
+    private var settingsWindow: NSWindow?
+    private let inputSourceManager = InputSourceManager()
+    private let hotkeyManager = HotkeyManager.shared
+    private let settings = AppSettings.shared
     
     func applicationDidFinishLaunching(_ notification: Notification) {
-        inputSourceManager = InputSourceManager()
-        hotkeyManager = HotkeyManager.shared
-        settings = AppSettings.shared
-        
-        setupMenuBar()
+        setupStatusItem()
         setupHotkey()
         requestNotificationPermission()
     }
     
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
-        return false
+        false
     }
     
-    private func setupMenuBar() {
-        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+    private func setupStatusItem() {
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+        guard let statusItem else { return }
+        
+        statusItem.behavior = [.removalAllowed]
+        statusItem.isVisible = true
+        statusItem.autosaveName = Bundle.main.bundleIdentifier ?? "MacLangTools.menu"
         
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "globe", accessibilityDescription: "MacLangTools")
+            if let image = NSImage(systemSymbolName: "character.cursor.ibeam", accessibilityDescription: "MacLangTools") {
+                image.isTemplate = true
+                button.image = image
+                button.image?.size = NSSize(width: 17, height: 17)
+            } else {
+                button.title = "⌥"
+            }
+            button.imagePosition = .imageOnly
+            button.toolTip = "MacLangTools – Option key multi-tap"
         }
         
-        updateMenu()
+        rebuildMenu()
     }
     
-    func updateMenu() {
+    private func rebuildMenu() {
         let menu = NSMenu()
         
-        let currentLang = inputSourceManager.getCurrentInputSource() ?? "Unknown"
-        menu.addItem(NSMenuItem(title: "Current: \(currentLang)", action: nil, keyEquivalent: ""))
+        let current = inputSourceManager.getCurrentInputSource() ?? "Unknown"
+        let header = NSMenuItem(title: "Current: \(current)", action: nil, keyEquivalent: "")
+        header.isEnabled = false
+        menu.addItem(header)
         menu.addItem(NSMenuItem.separator())
         
-        menu.addItem(NSMenuItem(title: "⌥×2 → \(settings.doubleTapLanguage.isEmpty ? "—" : settings.doubleTapLanguage)", action: nil, keyEquivalent: ""))
-        menu.addItem(NSMenuItem(title: "⌥×3 → \(settings.tripleTapLanguage.isEmpty ? "—" : settings.tripleTapLanguage)", action: nil, keyEquivalent: ""))
-        menu.addItem(NSMenuItem(title: "⌥×4 → \(settings.quadTapLanguage.isEmpty ? "—" : settings.quadTapLanguage)", action: nil, keyEquivalent: ""))
+        let doubleItem = NSMenuItem(title: "⌥×2 → \(settings.doubleTapLanguage.isEmpty ? "—" : settings.doubleTapLanguage)", action: nil, keyEquivalent: "")
+        doubleItem.isEnabled = false
+        menu.addItem(doubleItem)
+        
+        let tripleItem = NSMenuItem(title: "⌥×3 → \(settings.tripleTapLanguage.isEmpty ? "—" : settings.tripleTapLanguage)", action: nil, keyEquivalent: "")
+        tripleItem.isEnabled = false
+        menu.addItem(tripleItem)
+        
+        let quadItem = NSMenuItem(title: "⌥×4 → \(settings.quadTapLanguage.isEmpty ? "—" : settings.quadTapLanguage)", action: nil, keyEquivalent: "")
+        quadItem.isEnabled = false
+        menu.addItem(quadItem)
         
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "Settings...", action: #selector(openSettings), keyEquivalent: ","))
+        
+        let settingsItem = NSMenuItem(title: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
+        settingsItem.target = self
+        menu.addItem(settingsItem)
+        
         menu.addItem(NSMenuItem.separator())
         
-        let exitItem = NSMenuItem(title: "Exit", action: #selector(quitApp), keyEquivalent: "q")
-        exitItem.keyEquivalentModifierMask = []
-        menu.addItem(exitItem)
+        let quitItem = NSMenuItem(title: "Quit", action: #selector(quitApp), keyEquivalent: "q")
+        quitItem.target = self
+        menu.addItem(quitItem)
         
-        statusItem.menu = menu
+        statusItem?.menu = menu
     }
     
     private func setupHotkey() {
         hotkeyManager.onMultiTap = { [weak self] tapCount in
             self?.handleMultiTap(tapCount)
         }
-        
         hotkeyManager.start()
     }
     
     private func handleMultiTap(_ count: Int) {
-        var targetLanguage: String?
-        
+        let target: String?
         switch count {
         case 2:
-            targetLanguage = settings.doubleTapLanguage
+            target = settings.doubleTapLanguage
         case 3:
-            targetLanguage = settings.tripleTapLanguage
+            target = settings.tripleTapLanguage
         case 4...:
-            targetLanguage = settings.quadTapLanguage
+            target = settings.quadTapLanguage
         default:
-            return
+            target = nil
         }
         
-        guard let language = targetLanguage, !language.isEmpty else { return }
-        
+        guard let language = target, !language.isEmpty else { return }
         if inputSourceManager.switchToLanguage(language) {
-            animateMenuBarIcon()
-            updateMenu()
+            rebuildMenu()
+            showNotification(title: "Language switched", body: language)
         }
     }
     
-    private func animateMenuBarIcon() {
-        guard let button = statusItem.button else { return }
-        
-        let originalImage = button.image
-        button.image = NSImage(systemSymbolName: "globe.badge.chevron.backward", accessibilityDescription: nil)
-        button.contentTintColor = .systemGreen
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            button.image = originalImage
-            button.contentTintColor = nil
+    @objc private func openSettings() {
+        if settingsWindow == nil {
+            let hosting = NSHostingView(rootView: SettingsView())
+            let window = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 500, height: 640),
+                styleMask: [.titled, .closable, .miniaturizable],
+                backing: .buffered,
+                defer: false
+            )
+            window.center()
+            window.title = "MacLangTools"
+            window.contentView = hosting
+            window.isReleasedWhenClosed = false
+            settingsWindow = window
         }
+        
+        settingsWindow?.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+    
+    @objc private func quitApp() {
+        hotkeyManager.stop()
+        NSApp.terminate(nil)
     }
     
     private func requestNotificationPermission() {
@@ -115,18 +149,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
-        
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
         UNUserNotificationCenter.current().add(request)
-    }
-    
-    @objc func openSettings() {
-        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-        NSApp.activate(ignoringOtherApps: true)
-    }
-    
-    @objc func quitApp() {
-        hotkeyManager.stop()
-        NSApplication.shared.terminate(nil)
     }
 }

@@ -58,6 +58,10 @@ cat > "$APP_BUNDLE/Contents/Info.plist" << EOF
     <false/>
     <key>CFBundleIconFile</key>
     <string>AppIcon</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>The app listens for speech commands to switch layouts.</string>
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>Speech recognition is required to detect language switch commands.</string>
 </dict>
 </plist>
 EOF
