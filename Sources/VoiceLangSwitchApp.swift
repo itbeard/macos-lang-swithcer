@@ -28,6 +28,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         requestNotificationPermission()
     }
     
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        return false
+    }
+    
     private func setupMenuBar() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         
@@ -85,7 +89,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         guard let language = targetLanguage, !language.isEmpty else { return }
         
         if inputSourceManager.switchToLanguage(language) {
-            showNotification(title: "Language Changed", body: language)
             animateMenuBarIcon()
             updateMenu()
         }

@@ -95,3 +95,4 @@ rm -f /tmp/create_icon /tmp/create_icon.swift
 
 echo "✅ Icon created: $RESOURCES_DIR/AppIcon.icns"
 
+

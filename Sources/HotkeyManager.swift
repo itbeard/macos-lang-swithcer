@@ -1,16 +1,20 @@
 import Foundation
 import Carbon
 import AppKit
+import ApplicationServices
 
 class HotkeyManager {
     private var eventTap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
+    private var flagsMonitor: Any?
+    private var localMonitor: Any?
     
     var onMultiTap: ((Int) -> Void)?
     
     private var tapCount = 0
     private var lastTapTime: Date?
     private var tapTimer: Timer?
+    private var optionWasPressed = false
     
     static let shared = HotkeyManager()
     
@@ -21,52 +25,38 @@ class HotkeyManager {
     private init() {}
     
     func start() {
-        let eventMask = (1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.keyUp.rawValue)
+        let trusted = AXIsProcessTrusted()
         
-        guard let tap = CGEvent.tapCreate(
-            tap: .cgSessionEventTap,
-            place: .headInsertEventTap,
-            options: .defaultTap,
-            eventsOfInterest: CGEventMask(eventMask),
-            callback: { proxy, type, event, refcon in
-                let manager = Unmanaged<HotkeyManager>.fromOpaque(refcon!).takeUnretainedValue()
-                return manager.handleEvent(proxy: proxy, type: type, event: event)
-            },
-            userInfo: Unmanaged.passUnretained(self).toOpaque()
-        ) else {
-            print("Failed to create event tap. Grant Accessibility permissions.")
-            showAccessibilityAlert()
+        if !trusted {
+            let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue(): true] as CFDictionary
+            AXIsProcessTrustedWithOptions(options)
             return
         }
         
-        eventTap = tap
-        runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0)
-        CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
-        CGEvent.tapEnable(tap: tap, enable: true)
+        flagsMonitor = NSEvent.addGlobalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
+            self?.handleFlags(event.modifierFlags)
+        }
         
-        print("Hotkey manager started. Multi-tap Option to switch languages.")
+        localMonitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
+            self?.handleFlags(event.modifierFlags)
+            return event
+        }
     }
     
     func stop() {
-        if let tap = eventTap {
-            CGEvent.tapEnable(tap: tap, enable: false)
-        }
-        if let source = runLoopSource {
-            CFRunLoopRemoveSource(CFRunLoopGetCurrent(), source, .commonModes)
-        }
-        eventTap = nil
-        runLoopSource = nil
+        if let m = flagsMonitor { NSEvent.removeMonitor(m) }
+        if let m = localMonitor { NSEvent.removeMonitor(m) }
+        flagsMonitor = nil
+        localMonitor = nil
     }
     
-    private func handleEvent(proxy: CGEventTapProxy, type: CGEventType, event: CGEvent) -> Unmanaged<CGEvent>? {
-        let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
+    private func handleFlags(_ flags: NSEvent.ModifierFlags) {
+        let optionPressed = flags.contains(.option)
         
-        // Option key: 58 (left) or 61 (right)
-        if (keyCode == 58 || keyCode == 61) && type == .keyDown {
+        if optionPressed && !optionWasPressed {
             handleOptionTap()
         }
-        
-        return Unmanaged.passRetained(event)
+        optionWasPressed = optionPressed
     }
     
     private func handleOptionTap() {
@@ -86,27 +76,10 @@ class HotkeyManager {
             guard let self = self else { return }
             
             if self.tapCount >= 2 {
-                DispatchQueue.main.async {
-                    self.onMultiTap?(self.tapCount)
-                }
+                self.onMultiTap?(self.tapCount)
             }
             
             self.tapCount = 0
-        }
-    }
-    
-    private func showAccessibilityAlert() {
-        DispatchQueue.main.async {
-            let alert = NSAlert()
-            alert.messageText = "Permission Required"
-            alert.informativeText = "Add the app to System Settings → Privacy & Security → Accessibility"
-            alert.alertStyle = .warning
-            alert.addButton(withTitle: "Open Settings")
-            alert.addButton(withTitle: "Cancel")
-            
-            if alert.runModal() == .alertFirstButtonReturn {
-                NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)
-            }
         }
     }
 }
